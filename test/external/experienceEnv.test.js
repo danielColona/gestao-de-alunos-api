@@ -4,7 +4,7 @@ import { getToken } from '../helpers/auth.js';
 import 'dotenv/config';
 
 
-describe.only('Matricula de Aluno em Disciplina', () => {
+describe('Matricula de Aluno em Disciplina', () => {
 
     let token;
 

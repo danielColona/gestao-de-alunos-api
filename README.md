@@ -38,6 +38,8 @@ reiniciados sempre que o servidor é reiniciado, voltando ao conjunto de dados f
 - **morgan** — log de requisições HTTP no console
 - **nodemon** (dependência de desenvolvimento) — reinício automático do servidor durante o
   desenvolvimento
+- **mocha**, **chai**, **supertest**, **sinon** e **dotenv** — suíte de testes (veja
+  [Testes](#testes))
 
 Sem banco de dados externo nem ORM — persistência é 100% em memória, propositalmente simples para
 fins de estudo/demonstração. A autenticação, porém, é real: senhas com hash (bcrypt) e sessões
@@ -92,6 +94,59 @@ npm run dev
 
 O servidor sobe por padrão em `http://localhost:3000` (pode ser alterado com a variável de
 ambiente `PORT`).
+
+## Testes
+
+Os testes usam **mocha** (runner), **chai** (asserções), **supertest** (requisições HTTP),
+**sinon** (stubs/mocks) e **dotenv** (variáveis de ambiente dos testes externos).
+
+```
+test/
+  internal/               # testes que importam o app diretamente (não precisam do servidor rodando)
+    login.test.js
+  external/               # testes contra a API em execução (precisam do servidor no ar)
+    login.external.test.js
+    alunos.external.test.js
+    experience.test.js     # fluxo composto: cadastra aluno + disciplina e faz a matrícula
+    experienceEnv.test.js  # mesmo fluxo, lendo URL e credenciais do .env
+  helpers/
+    auth.js               # getToken(email, senha): faz login e retorna o JWT
+```
+
+### Configuração do `.env`
+
+Os testes externos e o helper `getToken` leem a URL da API e as credenciais do admin de um
+arquivo `.env` na **raiz do projeto** (o `dotenv` procura o arquivo na pasta onde o comando é
+executado). Copie o modelo e preencha os valores:
+
+```bash
+cp .env.example .env
+```
+
+```env
+BASE_URL='http://localhost:3000'
+ADMIN_EMAIL='admin@escola.com'
+ADMIN_PASSWORD='admin123'
+```
+
+O `.env` está no `.gitignore` e não deve ser commitado.
+
+### Execução
+
+```bash
+# em um terminal: subir a API (necessário para os testes externos)
+npm start
+
+# em outro terminal: rodar todos os testes
+npm test
+
+# rodar um arquivo específico
+npx mocha test/external/experienceEnv.test.js
+```
+
+> Como o banco é em memória, os testes que cadastram dados fixos (e-mail, matrícula, código da
+> disciplina) só passam uma vez por execução do servidor — na segunda vez a API responde `409`
+> (registro duplicado). Reinicie o servidor para voltar aos dados iniciais.
 
 ## Documentação da API (Swagger)
 
