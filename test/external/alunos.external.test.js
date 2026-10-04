@@ -29,22 +29,27 @@ describe('Login', () => {
     });
 
     it('deve cadastrar um aluno quando ele informa dados válidos', async () => {
+        // Dados únicos por execução, pois o servidor mantém os alunos em memória entre execuções
+        const sufixo = Date.now();
+        const email = `julio.lima.${sufixo}@example.com`;
+        const matricula = `2026-${sufixo}`;
+
         const cadastroAlunoResposta = await request('http://localhost:3000')
             .post('/api/admin/alunos')
             .set('Content-Type', 'application/json')
             .set('Authorization', `Bearer ${token}`)
             .send({
                 nome: 'Julio de Lima',
-                email: 'julio.lima@example.com',
-                matricula: '2026-0001',
+                email,
+                matricula,
                 senha: '123456'
             });
 
         // Validar que ele foi cadastrado
         expect(cadastroAlunoResposta.status).to.equal(201);
         expect(cadastroAlunoResposta.body.nome).to.equal('Julio de Lima');
-        expect(cadastroAlunoResposta.body.email).to.equal('julio.lima@example.com');
-        expect(cadastroAlunoResposta.body.matricula).to.equal('2026-0001');
+        expect(cadastroAlunoResposta.body.email).to.equal(email);
+        expect(cadastroAlunoResposta.body.matricula).to.equal(matricula);
 
     });
 });
