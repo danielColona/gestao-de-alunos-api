@@ -1,0 +1,45 @@
+name: Testes da API
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+
+    # Sem arquivo .env na pipeline: o dotenv não sobrescreve variáveis já definidas no ambiente
+    env:
+      BASE_URL: http://localhost:3000
+      ADMIN_EMAIL: admin@escola.com
+      ADMIN_PASSWORD: admin123
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v5
+
+      - name: Configurar o Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar as dependências
+        run: npm ci
+
+      - name: Subir a API em segundo plano
+        run: npm start &
+
+      - name: Aguardar a API responder
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf "$BASE_URL/" > /dev/null && exit 0
+            sleep 1
+          done
+          echo "A API não respondeu a tempo."
+          exit 1
+
+      - name: Rodar os testes de entrega de trabalho
+        run: npx mocha test/external/trabalhoAlunoEntrega.test.js

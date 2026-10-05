@@ -5,7 +5,7 @@ import 'dotenv/config';
 import { novoAluno } from '../factories/alunosFactory.js';
 import { novaMateria } from '../factories/materiasFactory.js';
 
-describe.only('Matricula de Aluno em Disciplina', () => {
+describe('Matricula de Aluno em Disciplina', () => {
 
     let token;
 
